@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -68,30 +69,78 @@ namespace Photo_Editor
             imgGray = (Image)bmp2;
             return imgGray;
         }
-
-        Image flip180(object obj)
+        Image flip(object obj)
         {
             Image imgColor = (Image)obj;
-            Image imgFlip180 = null;
+            Image imgFlip = null;
             Bitmap bmp1 = new Bitmap(imgColor);
             Bitmap bmp2 = new Bitmap(imgColor.Width, imgColor.Height);
             Color c1, c2;
-
+            var w = imgOriginal.Width - 1;
             for (int i = 0; i < imgOriginal.Width; i++)
             {
+                var h = imgOriginal.Height - 1;
                 for (int j = 0; j < imgOriginal.Height; j++)
                 {
                     c1 = bmp1.GetPixel(i, j);
-
+                    bmp2.SetPixel(i, h, c1);
+                    h--;
                 }
+                w--;
             }
-            imgFlip180 = (Image)bmp2;
-            return imgFlip180;
+            imgFlip = (Image)bmp2;
+            return imgFlip;
+        }
+        Image flipV(object obj)
+        {
+            Image imgColor = (Image)obj;
+            Image imgFlip = null;
+            Bitmap bmp1 = new Bitmap(imgColor);
+            Bitmap bmp2 = new Bitmap(imgColor.Width, imgColor.Height);
+            Color c1, c2;
+            var w = imgOriginal.Width - 1;
+            for (int i = 0; i < imgOriginal.Width; i++)
+            {
+                //var h = imgOriginal.Height - 1;
+                for (int j = 0; j < imgOriginal.Height; j++)
+                {
+                    c1 = bmp1.GetPixel(i, j);
+                    bmp2.SetPixel(w, j, c1);
+                    //h--;
+                }
+                w--;
+            }
+            imgFlip = (Image)bmp2;
+            return imgFlip;
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
             Func<object, Image> func = new Func<object, Image>(convert2gray);
+            Task<Image> t = new Task<Image>(func, imgOriginal);
+            t.Start();
+            t.ContinueWith((task) =>
+            {
+                pictureBox2.Image = task.Result;
+
+            }, TaskScheduler.FromCurrentSynchronizationContext());
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            Func<object, Image> func = new Func<object, Image>(flip);
+            Task<Image> t = new Task<Image>(func, imgOriginal);
+            t.Start();
+            t.ContinueWith((task) =>
+            {
+                pictureBox2.Image = task.Result;
+
+            }, TaskScheduler.FromCurrentSynchronizationContext());
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            Func<object, Image> func = new Func<object, Image>(flipV);
             Task<Image> t = new Task<Image>(func, imgOriginal);
             t.Start();
             t.ContinueWith((task) =>
