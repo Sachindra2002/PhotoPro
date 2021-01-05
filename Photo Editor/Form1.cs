@@ -51,9 +51,9 @@ namespace Photo_Editor
             Bitmap bmp1 = new Bitmap(imgColor);
             Bitmap bmp2 = new Bitmap(imgColor.Width, imgColor.Height);
             Color c1, c2;
-            for (int i = 1; i < imgOriginal.Width; i++)
+            for (int i = 1; i < imgColor.Width; i++)
             {
-                for (int j = 1; j < imgOriginal.Height; j++)
+                for (int j = 1; j < imgColor.Height; j++)
                 {
                     c1 = bmp1.GetPixel(i, j);
                     int c2A = (int)c1.A;
@@ -76,11 +76,11 @@ namespace Photo_Editor
             Bitmap bmp1 = new Bitmap(imgColor);
             Bitmap bmp2 = new Bitmap(imgColor.Width, imgColor.Height);
             Color c1, c2;
-            var w = imgOriginal.Width - 1;
-            for (int i = 0; i < imgOriginal.Width; i++)
+            var w = imgColor.Width - 1;
+            for (int i = 0; i < imgColor.Width; i++)
             {
-                var h = imgOriginal.Height - 1;
-                for (int j = 0; j < imgOriginal.Height; j++)
+                var h = imgColor.Height - 1;
+                for (int j = 0; j < imgColor.Height; j++)
                 {
                     c1 = bmp1.GetPixel(i, j);
                     bmp2.SetPixel(i, h, c1);
@@ -98,11 +98,11 @@ namespace Photo_Editor
             Bitmap bmp1 = new Bitmap(imgColor);
             Bitmap bmp2 = new Bitmap(imgColor.Width, imgColor.Height);
             Color c1, c2;
-            var w = imgOriginal.Width - 1;
-            for (int i = 0; i < imgOriginal.Width; i++)
+            var w = imgColor.Width - 1;
+            for (int i = 0; i < imgColor.Width; i++)
             {
                 //var h = imgOriginal.Height - 1;
-                for (int j = 0; j < imgOriginal.Height; j++)
+                for (int j = 0; j < imgColor.Height; j++)
                 {
                     c1 = bmp1.GetPixel(i, j);
                     bmp2.SetPixel(w, j, c1);
@@ -121,9 +121,9 @@ namespace Photo_Editor
             Bitmap bmp1 = new Bitmap(imgColor);
             Bitmap bmp2 = new Bitmap(imgColor.Width, imgColor.Height);
             Color c1, c2;
-            for (int y = 0; (y <= (imgOriginal.Height - 1)); y++)
+            for (int y = 0; (y <= (imgColor.Height - 1)); y++)
             {
-                for (int x = 0; (x <= (imgOriginal.Width - 1)); x++)
+                for (int x = 0; (x <= (imgColor.Width - 1)); x++)
                 {
                     Color inv = bmp1.GetPixel(x, y);
                     inv = Color.FromArgb(255, (255 - inv.R), (255 - inv.G), (255 - inv.B));
@@ -143,9 +143,9 @@ namespace Photo_Editor
             Bitmap bmp2 = new Bitmap(imgColor.Width, imgColor.Height);
 
             var contrast = Math.Pow((100.0 + value) / 100.0, 2);
-            for (int y = 0; y < imgOriginal.Height; y++)
+            for (int y = 0; y < imgColor.Height; y++)
             {
-                for (int x = 0; x < imgOriginal.Width; x++)
+                for (int x = 0; x < imgColor.Width; x++)
                 {
                     var oldColor = bmp1.GetPixel(x, y);
                     var red = ((((oldColor.R / 255.0) - 0.5) * contrast) + 0.5) * 255.0;
@@ -169,14 +169,53 @@ namespace Photo_Editor
 
         }
 
+        Image Pixelate(object obj)
+        {
+            Image imgColor = (Image)obj;
+            Image imgPixelated = null;
+            Bitmap bmp1 = new Bitmap(imgColor);
+            Bitmap bmp2 = new Bitmap(imgColor.Width, imgColor.Height);
+            for (var yy = 0; yy < imgColor.Height && yy < imgColor.Height; yy += 4)
+            {
+                for (var xx = 0; xx < imgColor.Width && xx < imgColor.Width; xx += 4)
+                {
+                    var cellColors = new List<Color>();
+                    // Store each color from the 4x4 cell into cellColors.
+                    for (var y = yy; y < yy + 4 && y < imgColor.Height; y++)
+                    {
+                        for (var x = xx; x < xx + 4 && x < imgColor.Width; x++)
+                        {
+                            cellColors.Add(bmp1.GetPixel(x, y));
+                        }
+                    }
+
+                    // Get the average red, green, and blue values.
+                    var averageRed = cellColors.Aggregate(0, (current, color) => current + color.R) / cellColors.Count;
+                    var averageGreen = cellColors.Aggregate(0, (current, color) => current + color.G) / cellColors.Count;
+                    var averageBlue = cellColors.Aggregate(0, (current, color) => current + color.B) / cellColors.Count;
+                    var averageColor = Color.FromArgb(averageRed, averageGreen, averageBlue);
+
+                    // Go BACK over the 4x4 cell and set each pixel to the average color.
+                    for (var y = yy; y < yy + 4 && y < imgColor.Height; y++)
+                    {
+                        for (var x = xx; x < xx + 4 && x < imgColor.Width; x++)
+                        {
+                            bmp2.SetPixel(x, y, averageColor);
+                        }
+                    }
+                }
+            }
+            imgPixelated = (Image)bmp2;
+            return imgPixelated;
+        }
         private void button2_Click(object sender, EventArgs e)
         {
             Func<object, Image> func = new Func<object, Image>(convert2gray);
-            Task<Image> t = new Task<Image>(func, imgOriginal);
+            Task<Image> t = new Task<Image>(func, pictureBox1.Image);
             t.Start();
             t.ContinueWith((task) =>
             {
-                pictureBox2.Image = task.Result;
+                pictureBox1.Image = task.Result;
 
             }, TaskScheduler.FromCurrentSynchronizationContext());
         }
@@ -184,11 +223,11 @@ namespace Photo_Editor
         private void button3_Click(object sender, EventArgs e)
         {
             Func<object, Image> func = new Func<object, Image>(flip);
-            Task<Image> t = new Task<Image>(func, imgOriginal);
+            Task<Image> t = new Task<Image>(func, pictureBox1.Image);
             t.Start();
             t.ContinueWith((task) =>
             {
-                pictureBox2.Image = task.Result;
+                pictureBox1.Image = task.Result;
 
             }, TaskScheduler.FromCurrentSynchronizationContext());
         }
@@ -196,11 +235,11 @@ namespace Photo_Editor
         private void button4_Click(object sender, EventArgs e)
         {
             Func<object, Image> func = new Func<object, Image>(flipV);
-            Task<Image> t = new Task<Image>(func, imgOriginal);
+            Task<Image> t = new Task<Image>(func, pictureBox1.Image);
             t.Start();
             t.ContinueWith((task) =>
             {
-                pictureBox2.Image = task.Result;
+                pictureBox1.Image = task.Result;
 
             }, TaskScheduler.FromCurrentSynchronizationContext());
         }
@@ -208,11 +247,11 @@ namespace Photo_Editor
         private void button5_Click(object sender, EventArgs e)
         {
             Func<object, Image> func = new Func<object, Image>(Invert);
-            Task<Image> t = new Task<Image>(func, imgOriginal);
+            Task<Image> t = new Task<Image>(func, pictureBox1.Image);
             t.Start();
             t.ContinueWith((task) =>
             {
-                pictureBox2.Image = task.Result;
+                pictureBox1.Image = task.Result;
 
             }, TaskScheduler.FromCurrentSynchronizationContext());
 
@@ -223,11 +262,11 @@ namespace Photo_Editor
             {
                 float val = float.Parse(textBox1.Text);
                 Func<object, float, Image> func = new Func<object, float, Image>(Contrast);
-                Task<Image> t = new Task<Image>(() => func(imgOriginal, val));
+                Task<Image> t = new Task<Image>(() => func(pictureBox1.Image, val));
                 t.Start();
                 t.ContinueWith((task) =>
                 {
-                    pictureBox2.Image = task.Result;
+                    pictureBox1.Image = task.Result;
 
                 }, TaskScheduler.FromCurrentSynchronizationContext());
             }
@@ -235,6 +274,23 @@ namespace Photo_Editor
             {
                 MessageBox.Show("Please enter an value!");
             }
+
+        }
+
+        private void button8_Click(object sender, EventArgs e)
+        {
+            Func<object, Image> func = new Func<object, Image>(Pixelate);
+            Task<Image> t = new Task<Image>(func, pictureBox1.Image);
+            t.Start();
+            t.ContinueWith((task) =>
+            {
+                pictureBox1.Image = task.Result;
+
+            }, TaskScheduler.FromCurrentSynchronizationContext());
+        }
+
+        private void button7_Click(object sender, EventArgs e)
+        {
 
         }
     }
