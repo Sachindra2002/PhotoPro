@@ -4,6 +4,8 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,6 +16,8 @@ namespace Photo_Editor
     public partial class Form1 : Form
     {
         Image imgOriginal;
+        Image Picture;
+        Boolean openedPicture = false;
         public Form1()
         {
             InitializeComponent();
@@ -37,12 +41,46 @@ namespace Photo_Editor
                 string imgFileName = openFileDialog1.FileName;
                 imgOriginal = Image.FromFile(imgFileName);
                 pictureBox1.Image = imgOriginal;
-
+                openedPicture = true;
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
             }
+        }
+        public void SavePhoto()
+        {
+            if (openedPicture)
+            {
+
+                SaveFileDialog save_pic = new SaveFileDialog();
+                save_pic.Filter = "Images|*.png;*.jpg*;.bmp*";
+                ImageFormat format = ImageFormat.Png;
+
+
+                if (save_pic.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                {
+                    string extension = Path.GetExtension(save_pic.FileName);
+
+                    switch (extension)
+                    {
+
+                        case ".jpg":
+                            format = ImageFormat.Jpeg;
+                            break;
+
+                        case ".png":
+                            format = ImageFormat.Png;
+                            break;
+                    }
+                    pictureBox1.Image.Save(save_pic.FileName, format);
+                }
+            }
+            else
+            {
+                MessageBox.Show("Please upload an image!");
+            }
+
         }
         Image convert2gray(object obj)
         {
@@ -208,6 +246,132 @@ namespace Photo_Editor
             imgPixelated = (Image)bmp2;
             return imgPixelated;
         }
+        public void picture_refresh()
+        {
+            pictureBox1.Image = imgOriginal;
+        }
+        private object lockObject = new object();
+        Image ChangeRGB(float red, float green, float blue, float brightness)
+        {
+            picture_refresh();
+            Image pic;
+            lock (lockObject)
+            {
+                Image img = pictureBox1.Image;
+                pic = (Image)img.Clone();
+            }
+            
+            Bitmap bitmap = new Bitmap(pic.Width, pic.Height);
+            ImageAttributes imageAttributes = new ImageAttributes();
+            ColorMatrix colorMatrix = new ColorMatrix(new float[][]
+            {
+                new float[]{1+red,0 ,0 ,0 , 0 ,},
+                new float[]{0 ,1+green, 0, 0, 0,},
+                new float[]{0, 0,1+blue, 0, 0 ,},
+                new float[]{0, 0, 0, 1, 0},
+                new float[]{brightness,brightness,brightness, 0, 1}
+            });
+
+            imageAttributes.SetColorMatrix(colorMatrix);
+            Graphics graphics = Graphics.FromImage(bitmap);
+            graphics.DrawImage(pic, new Rectangle(0, 0, pic.Width, pic.Height), 0, 0, pic.Width, pic.Height, GraphicsUnit.Pixel, imageAttributes);
+            graphics.Dispose();
+            return bitmap;
+        }
+        Image serpia(object obj)
+        {
+            Image imgColor = (Image)obj;
+            Image imgSerpia = null;
+            Bitmap bmp1 = new Bitmap(imgColor);
+            Bitmap bmp2 = new Bitmap(imgColor.Width, imgColor.Height);
+            Color c1, c2;
+            for (int y = 0; y < imgColor.Height; y++)
+            {
+                for (int x = 0; x < imgColor.Width; x++)
+                {
+                    Color color = bmp1.GetPixel(x, y);
+                    //c1 = bmp1.GetPixel(i, j);
+                    int a = color.A;
+                    int r = color.B;
+                    int g = color.R;
+                    int b = color.B;
+                    int tr = (int)(0.393 * r + 0.769 * g + 0.189 * b);
+                    int tg = (int)(0.349 * r + 0.686 * g + 0.168 * b);
+                    int tb = (int)(0.271 * r + 0.534 * g + 0.131 * b);
+                    if (tr > 255)
+                    {
+                        r = 255;
+                    }
+                    else
+                    {
+                        r = tr;
+                    }
+                    if (tg > 255)
+                    {
+
+                        g = 255;
+                    }
+                    else
+                    {
+                        g = tg;
+                    }
+                    if (tb > 255)
+                    {
+                        b = 255;
+                    }
+                    else
+                    {
+                        b = tb;
+                    }
+
+                    bmp2.SetPixel(x, y, Color.FromArgb(a, r, g, b));
+
+                }
+            }
+            imgSerpia = (Image)bmp2;
+            return imgSerpia;
+
+        }
+        Image rotateNinety(object obj)
+        {
+            int rotationAngle = 90;
+            Image imgColor = (Image)obj;
+            Image imgRotateNinety = null;
+            Bitmap bmp1 = new Bitmap(imgColor);
+            Bitmap bmp2 = new Bitmap(imgColor.Width, imgColor.Height);
+            Color c1, c2;
+            Graphics gfx = Graphics.FromImage(bmp2);
+            gfx.TranslateTransform((float)bmp2.Width / 2, (float)bmp2.Height / 2);
+            gfx.RotateTransform(rotationAngle);
+            gfx.TranslateTransform(-(float)bmp2.Width / 2, -(float)bmp2.Height / 2);
+            gfx.InterpolationMode = InterpolationMode.HighQualityBicubic;
+            gfx.DrawImage(imgColor, new Point(0, 0));
+            gfx.Dispose();
+            imgRotateNinety = (Image)bmp2;
+            return imgRotateNinety;
+        }
+        Image rotateLeft(object obj)
+        {
+            int rotationAngle = -90;
+            Image imgColor = (Image)obj;
+            Image imgRotateLeft = null;
+            Bitmap bmp1 = new Bitmap(imgColor);
+            Bitmap bmp2 = new Bitmap(imgColor.Width, imgColor.Height);
+            Color c1, c2;
+            Graphics gfx = Graphics.FromImage(bmp2);
+            gfx.TranslateTransform((float)bmp2.Width / 2, (float)bmp2.Height / 2);
+            gfx.RotateTransform(rotationAngle);
+            gfx.TranslateTransform(-(float)bmp2.Width / 2, -(float)bmp2.Height / 2);
+            gfx.InterpolationMode = InterpolationMode.HighQualityBicubic;
+            gfx.DrawImage(imgColor, new Point(0, 0));
+            gfx.Dispose();
+            imgRotateLeft = (Image)bmp2;
+            return imgRotateLeft;
+        }
+        private void reset()
+        {
+            pictureBox1.Image = imgOriginal;
+        }
         private void button2_Click(object sender, EventArgs e)
         {
             Func<object, Image> func = new Func<object, Image>(convert2gray);
@@ -216,6 +380,7 @@ namespace Photo_Editor
             t.ContinueWith((task) =>
             {
                 pictureBox1.Image = task.Result;
+                Picture = pictureBox1.Image;
 
             }, TaskScheduler.FromCurrentSynchronizationContext());
         }
@@ -228,6 +393,7 @@ namespace Photo_Editor
             t.ContinueWith((task) =>
             {
                 pictureBox1.Image = task.Result;
+                Picture = pictureBox1.Image;
 
             }, TaskScheduler.FromCurrentSynchronizationContext());
         }
@@ -240,6 +406,7 @@ namespace Photo_Editor
             t.ContinueWith((task) =>
             {
                 pictureBox1.Image = task.Result;
+                Picture = pictureBox1.Image;
 
             }, TaskScheduler.FromCurrentSynchronizationContext());
         }
@@ -252,6 +419,7 @@ namespace Photo_Editor
             t.ContinueWith((task) =>
             {
                 pictureBox1.Image = task.Result;
+                Picture = pictureBox1.Image;
 
             }, TaskScheduler.FromCurrentSynchronizationContext());
 
@@ -267,6 +435,7 @@ namespace Photo_Editor
                 t.ContinueWith((task) =>
                 {
                     pictureBox1.Image = task.Result;
+                    Picture = pictureBox1.Image;
 
                 }, TaskScheduler.FromCurrentSynchronizationContext());
             }
@@ -276,7 +445,6 @@ namespace Photo_Editor
             }
 
         }
-
         private void button8_Click(object sender, EventArgs e)
         {
             Func<object, Image> func = new Func<object, Image>(Pixelate);
@@ -285,13 +453,137 @@ namespace Photo_Editor
             t.ContinueWith((task) =>
             {
                 pictureBox1.Image = task.Result;
+                Picture = pictureBox1.Image;
+
+            }, TaskScheduler.FromCurrentSynchronizationContext());
+        }
+        private void trackBar1_Scroll(object sender, EventArgs e)
+        {
+            float red = trackBar1.Value * 0.1f;
+            float green = trackBar2.Value * 0.1f;
+            float blue = trackBar3.Value * 0.1f;
+            float brightness = trackBar4.Value * 0.1f;
+
+            label8.Text = red.ToString();
+            label9.Text = green.ToString();
+            label10.Text = blue.ToString();
+            label12.Text = brightness.ToString();
+            Func<float, float, float, float, Image> func = new Func<float, float, float, float, Image>(ChangeRGB);
+            Task<Image> t = new Task<Image>(() => func(red, green, blue, brightness));
+            t.Start();
+            t.ContinueWith((task) =>
+            {
+                pictureBox1.Image = task.Result;
+            }, TaskScheduler.FromCurrentSynchronizationContext());
+        }
+
+        private void trackBar2_Scroll(object sender, EventArgs e)
+        {
+            float red = trackBar1.Value * 0.1f;
+            float green = trackBar2.Value * 0.1f;
+            float blue = trackBar3.Value * 0.1f;
+            float brightness = trackBar4.Value * 0.1f;
+
+            label8.Text = red.ToString();
+            label9.Text = green.ToString();
+            label10.Text = blue.ToString();
+            label12.Text = brightness.ToString();
+            Func<float, float, float, float, Image> func = new Func<float, float, float, float, Image>(ChangeRGB);
+            Task<Image> t = new Task<Image>(() => func(red, green, blue, brightness));
+            t.Start();
+            t.ContinueWith((task) =>
+            {
+                pictureBox1.Image = task.Result;
+            }, TaskScheduler.FromCurrentSynchronizationContext());
+        }
+
+        private void trackBar3_Scroll(object sender, EventArgs e)
+        {
+            float red = trackBar1.Value * 0.1f;
+            float green = trackBar2.Value * 0.1f;
+            float blue = trackBar3.Value * 0.1f;
+            float brightness = trackBar4.Value * 0.1f;
+
+            label8.Text = red.ToString();
+            label9.Text = green.ToString();
+            label10.Text = blue.ToString();
+            label12.Text = brightness.ToString();
+            Func<float, float, float, float, Image> func = new Func<float, float, float, float, Image>(ChangeRGB);
+            Task<Image> t = new Task<Image>(() => func(red, green, blue, brightness));
+            t.Start();
+            t.ContinueWith((task) =>
+            {
+                pictureBox1.Image = task.Result;
+            }, TaskScheduler.FromCurrentSynchronizationContext());
+        }
+
+        private void trackBar4_Scroll(object sender, EventArgs e)
+        {
+            float red = trackBar1.Value * 0.1f;
+            float green = trackBar2.Value * 0.1f;
+            float blue = trackBar3.Value * 0.1f;
+            float brightness = trackBar4.Value * 0.1f;
+
+            label8.Text = red.ToString();
+            label9.Text = green.ToString();
+            label10.Text = blue.ToString();
+            label12.Text = brightness.ToString();
+            Func<float, float, float, float, Image> func = new Func<float, float, float, float, Image>(ChangeRGB);
+            Task<Image> t = new Task<Image>(() => func(red, green, blue, brightness));
+            t.Start();
+            t.ContinueWith((task) =>
+            {
+                pictureBox1.Image = task.Result;
+            }, TaskScheduler.FromCurrentSynchronizationContext());
+        }
+
+        private void button7_Click_1(object sender, EventArgs e)
+        {
+            SavePhoto();
+        }
+
+        private void button9_Click(object sender, EventArgs e)
+        {
+            Func<object, Image> func = new Func<object, Image>(serpia);
+            Task<Image> t = new Task<Image>(func, pictureBox1.Image);
+            t.Start();
+            t.ContinueWith((task) =>
+            {
+                pictureBox1.Image = task.Result;
+                Picture = pictureBox1.Image;
 
             }, TaskScheduler.FromCurrentSynchronizationContext());
         }
 
-        private void button7_Click(object sender, EventArgs e)
+        private void button10_Click(object sender, EventArgs e)
         {
+            reset();
+        }
 
+        private void button11_Click(object sender, EventArgs e)
+        {
+            Func<object, Image> func = new Func<object, Image>(rotateNinety);
+            Task<Image> t = new Task<Image>(func, pictureBox1.Image);
+            t.Start();
+            t.ContinueWith((task) =>
+            {
+                pictureBox1.Image = task.Result;
+                Picture = pictureBox1.Image;
+
+            }, TaskScheduler.FromCurrentSynchronizationContext());
+        }
+
+        private void button12_Click(object sender, EventArgs e)
+        {
+            Func<object, Image> func = new Func<object, Image>(rotateLeft);
+            Task<Image> t = new Task<Image>(func, pictureBox1.Image);
+            t.Start();
+            t.ContinueWith((task) =>
+            {
+                pictureBox1.Image = task.Result;
+                Picture = pictureBox1.Image;
+
+            }, TaskScheduler.FromCurrentSynchronizationContext());
         }
     }
 }
