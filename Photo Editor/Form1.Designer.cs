@@ -30,6 +30,10 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.panel1 = new System.Windows.Forms.Panel();
+            this.label30 = new System.Windows.Forms.Label();
+            this.button6 = new System.Windows.Forms.Button();
+            this.label22 = new System.Windows.Forms.Label();
+            this.label6 = new System.Windows.Forms.Label();
             this.label29 = new System.Windows.Forms.Label();
             this.trackBar6 = new System.Windows.Forms.TrackBar();
             this.label28 = new System.Windows.Forms.Label();
@@ -78,20 +82,14 @@
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
-            this.textBox2 = new System.Windows.Forms.TextBox();
-            this.textBox3 = new System.Windows.Forms.TextBox();
-            this.textBox4 = new System.Windows.Forms.TextBox();
-            this.textBox5 = new System.Windows.Forms.TextBox();
             this.textBox7 = new System.Windows.Forms.TextBox();
             this.textBox8 = new System.Windows.Forms.TextBox();
             this.label23 = new System.Windows.Forms.Label();
             this.label24 = new System.Windows.Forms.Label();
             this.label25 = new System.Windows.Forms.Label();
             this.button15 = new System.Windows.Forms.Button();
-            this.label6 = new System.Windows.Forms.Label();
-            this.label22 = new System.Windows.Forms.Label();
-            this.button6 = new System.Windows.Forms.Button();
-            this.label30 = new System.Windows.Forms.Label();
+            this.button14 = new System.Windows.Forms.Button();
+            this.button18 = new System.Windows.Forms.Button();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.trackBar6)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.trackBar5)).BeginInit();
@@ -105,6 +103,8 @@
             // panel1
             // 
             this.panel1.BackColor = System.Drawing.Color.LightGray;
+            this.panel1.Controls.Add(this.button18);
+            this.panel1.Controls.Add(this.button14);
             this.panel1.Controls.Add(this.label30);
             this.panel1.Controls.Add(this.button6);
             this.panel1.Controls.Add(this.label22);
@@ -148,10 +148,51 @@
             this.panel1.Size = new System.Drawing.Size(1269, 179);
             this.panel1.TabIndex = 0;
             // 
+            // label30
+            // 
+            this.label30.AutoSize = true;
+            this.label30.Location = new System.Drawing.Point(760, 63);
+            this.label30.Name = "label30";
+            this.label30.Size = new System.Drawing.Size(58, 17);
+            this.label30.TabIndex = 56;
+            this.label30.Text = "Emboss";
+            // 
+            // button6
+            // 
+            this.button6.BackColor = System.Drawing.Color.LightGray;
+            this.button6.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("button6.BackgroundImage")));
+            this.button6.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.button6.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.button6.FlatAppearance.BorderColor = System.Drawing.Color.LightGray;
+            this.button6.Location = new System.Drawing.Point(763, 18);
+            this.button6.Name = "button6";
+            this.button6.Size = new System.Drawing.Size(46, 40);
+            this.button6.TabIndex = 55;
+            this.button6.UseVisualStyleBackColor = false;
+            this.button6.Click += new System.EventHandler(this.button6_Click_1);
+            // 
+            // label22
+            // 
+            this.label22.AutoSize = true;
+            this.label22.Location = new System.Drawing.Point(1054, 92);
+            this.label22.Name = "label22";
+            this.label22.Size = new System.Drawing.Size(61, 17);
+            this.label22.TabIndex = 54;
+            this.label22.Text = "Contrast";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(1054, 18);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(57, 17);
+            this.label6.TabIndex = 50;
+            this.label6.Text = "Gamma";
+            // 
             // label29
             // 
             this.label29.AutoSize = true;
-            this.label29.Location = new System.Drawing.Point(864, 121);
+            this.label29.Location = new System.Drawing.Point(905, 121);
             this.label29.Name = "label29";
             this.label29.Size = new System.Drawing.Size(22, 17);
             this.label29.TabIndex = 53;
@@ -160,7 +201,7 @@
             // trackBar6
             // 
             this.trackBar6.BackColor = System.Drawing.Color.LightGray;
-            this.trackBar6.Location = new System.Drawing.Point(893, 110);
+            this.trackBar6.Location = new System.Drawing.Point(934, 110);
             this.trackBar6.Name = "trackBar6";
             this.trackBar6.Size = new System.Drawing.Size(276, 56);
             this.trackBar6.TabIndex = 52;
@@ -169,7 +210,7 @@
             // label28
             // 
             this.label28.AutoSize = true;
-            this.label28.Location = new System.Drawing.Point(864, 36);
+            this.label28.Location = new System.Drawing.Point(905, 36);
             this.label28.Name = "label28";
             this.label28.Size = new System.Drawing.Size(24, 17);
             this.label28.TabIndex = 50;
@@ -178,7 +219,7 @@
             // trackBar5
             // 
             this.trackBar5.BackColor = System.Drawing.Color.LightGray;
-            this.trackBar5.Location = new System.Drawing.Point(893, 33);
+            this.trackBar5.Location = new System.Drawing.Point(934, 33);
             this.trackBar5.Name = "trackBar5";
             this.trackBar5.Size = new System.Drawing.Size(276, 56);
             this.trackBar5.TabIndex = 51;
@@ -524,7 +565,7 @@
             // 
             this.label15.AutoSize = true;
             this.label15.ForeColor = System.Drawing.Color.White;
-            this.label15.Location = new System.Drawing.Point(1094, 490);
+            this.label15.Location = new System.Drawing.Point(1135, 486);
             this.label15.Name = "label15";
             this.label15.Size = new System.Drawing.Size(75, 17);
             this.label15.TabIndex = 31;
@@ -534,7 +575,7 @@
             // 
             this.label14.AutoSize = true;
             this.label14.ForeColor = System.Drawing.Color.White;
-            this.label14.Location = new System.Drawing.Point(1112, 411);
+            this.label14.Location = new System.Drawing.Point(1153, 407);
             this.label14.Name = "label14";
             this.label14.Size = new System.Drawing.Size(36, 17);
             this.label14.TabIndex = 30;
@@ -544,7 +585,7 @@
             // 
             this.label13.AutoSize = true;
             this.label13.ForeColor = System.Drawing.Color.White;
-            this.label13.Location = new System.Drawing.Point(1100, 332);
+            this.label13.Location = new System.Drawing.Point(1141, 328);
             this.label13.Name = "label13";
             this.label13.Size = new System.Drawing.Size(48, 17);
             this.label13.TabIndex = 29;
@@ -553,7 +594,7 @@
             // label12
             // 
             this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(1001, 519);
+            this.label12.Location = new System.Drawing.Point(1042, 515);
             this.label12.Name = "label12";
             this.label12.Size = new System.Drawing.Size(22, 17);
             this.label12.TabIndex = 28;
@@ -561,7 +602,7 @@
             // 
             // trackBar4
             // 
-            this.trackBar4.Location = new System.Drawing.Point(1029, 510);
+            this.trackBar4.Location = new System.Drawing.Point(1070, 506);
             this.trackBar4.Name = "trackBar4";
             this.trackBar4.Size = new System.Drawing.Size(187, 56);
             this.trackBar4.TabIndex = 27;
@@ -569,7 +610,7 @@
             // 
             // trackBar3
             // 
-            this.trackBar3.Location = new System.Drawing.Point(1029, 431);
+            this.trackBar3.Location = new System.Drawing.Point(1070, 427);
             this.trackBar3.Name = "trackBar3";
             this.trackBar3.Size = new System.Drawing.Size(187, 56);
             this.trackBar3.TabIndex = 26;
@@ -577,7 +618,7 @@
             // 
             // trackBar2
             // 
-            this.trackBar2.Location = new System.Drawing.Point(1029, 352);
+            this.trackBar2.Location = new System.Drawing.Point(1070, 348);
             this.trackBar2.Name = "trackBar2";
             this.trackBar2.Size = new System.Drawing.Size(187, 56);
             this.trackBar2.TabIndex = 25;
@@ -585,7 +626,7 @@
             // 
             // trackBar1
             // 
-            this.trackBar1.Location = new System.Drawing.Point(1029, 273);
+            this.trackBar1.Location = new System.Drawing.Point(1070, 269);
             this.trackBar1.Name = "trackBar1";
             this.trackBar1.Size = new System.Drawing.Size(187, 56);
             this.trackBar1.TabIndex = 24;
@@ -594,7 +635,7 @@
             // label10
             // 
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(1001, 438);
+            this.label10.Location = new System.Drawing.Point(1042, 434);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(22, 17);
             this.label10.TabIndex = 21;
@@ -603,7 +644,7 @@
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(999, 361);
+            this.label9.Location = new System.Drawing.Point(1040, 357);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(24, 17);
             this.label9.TabIndex = 20;
@@ -612,7 +653,7 @@
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(1000, 280);
+            this.label8.Location = new System.Drawing.Point(1041, 276);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(23, 17);
             this.label8.TabIndex = 19;
@@ -622,7 +663,7 @@
             // 
             this.label7.AutoSize = true;
             this.label7.ForeColor = System.Drawing.SystemColors.ButtonHighlight;
-            this.label7.Location = new System.Drawing.Point(1100, 253);
+            this.label7.Location = new System.Drawing.Point(1141, 249);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(38, 17);
             this.label7.TabIndex = 14;
@@ -641,44 +682,17 @@
             this.pictureBox1.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("pictureBox1.BackgroundImage")));
             this.pictureBox1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
             this.pictureBox1.Cursor = System.Windows.Forms.Cursors.Cross;
-            this.pictureBox1.Location = new System.Drawing.Point(345, 185);
+            this.pictureBox1.Location = new System.Drawing.Point(274, 185);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(619, 562);
+            this.pictureBox1.Size = new System.Drawing.Size(735, 652);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBox1.TabIndex = 0;
             this.pictureBox1.TabStop = false;
             this.pictureBox1.Paint += new System.Windows.Forms.PaintEventHandler(this.picOriginalPicture_Paint);
             this.pictureBox1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.picOriginalPicture_MouseDown);
+            this.pictureBox1.MouseEnter += new System.EventHandler(this.picOriginalPicture_MouseEnter);
             this.pictureBox1.MouseMove += new System.Windows.Forms.MouseEventHandler(this.picOriginalPicture_MouseMove);
             this.pictureBox1.MouseUp += new System.Windows.Forms.MouseEventHandler(this.picOriginalPicture_MouseUp);
-            // 
-            // textBox2
-            // 
-            this.textBox2.Location = new System.Drawing.Point(1157, 640);
-            this.textBox2.Name = "textBox2";
-            this.textBox2.Size = new System.Drawing.Size(100, 22);
-            this.textBox2.TabIndex = 1;
-            // 
-            // textBox3
-            // 
-            this.textBox3.Location = new System.Drawing.Point(1157, 668);
-            this.textBox3.Name = "textBox3";
-            this.textBox3.Size = new System.Drawing.Size(100, 22);
-            this.textBox3.TabIndex = 2;
-            // 
-            // textBox4
-            // 
-            this.textBox4.Location = new System.Drawing.Point(1157, 696);
-            this.textBox4.Name = "textBox4";
-            this.textBox4.Size = new System.Drawing.Size(100, 22);
-            this.textBox4.TabIndex = 3;
-            // 
-            // textBox5
-            // 
-            this.textBox5.Location = new System.Drawing.Point(1157, 724);
-            this.textBox5.Name = "textBox5";
-            this.textBox5.Size = new System.Drawing.Size(100, 22);
-            this.textBox5.TabIndex = 4;
             // 
             // textBox7
             // 
@@ -735,63 +749,46 @@
             this.button15.UseVisualStyleBackColor = true;
             this.button15.Click += new System.EventHandler(this.button15_Click);
             // 
-            // label6
+            // button14
             // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(1013, 18);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(57, 17);
-            this.label6.TabIndex = 50;
-            this.label6.Text = "Gamma";
+            this.button14.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("button14.BackgroundImage")));
+            this.button14.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.button14.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.button14.FlatAppearance.BorderColor = System.Drawing.Color.LightGray;
+            this.button14.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.button14.Location = new System.Drawing.Point(123, 104);
+            this.button14.Name = "button14";
+            this.button14.Size = new System.Drawing.Size(50, 39);
+            this.button14.TabIndex = 57;
+            this.button14.UseVisualStyleBackColor = true;
+            this.button14.Click += new System.EventHandler(this.button14_Click);
             // 
-            // label22
+            // button18
             // 
-            this.label22.AutoSize = true;
-            this.label22.Location = new System.Drawing.Point(1013, 92);
-            this.label22.Name = "label22";
-            this.label22.Size = new System.Drawing.Size(61, 17);
-            this.label22.TabIndex = 54;
-            this.label22.Text = "Contrast";
-            // 
-            // button6
-            // 
-            this.button6.BackColor = System.Drawing.Color.LightGray;
-            this.button6.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("button6.BackgroundImage")));
-            this.button6.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.button6.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.button6.FlatAppearance.BorderColor = System.Drawing.Color.LightGray;
-            this.button6.Location = new System.Drawing.Point(763, 18);
-            this.button6.Name = "button6";
-            this.button6.Size = new System.Drawing.Size(46, 40);
-            this.button6.TabIndex = 55;
-            this.button6.UseVisualStyleBackColor = false;
-            this.button6.Click += new System.EventHandler(this.button6_Click_1);
-            // 
-            // label30
-            // 
-            this.label30.AutoSize = true;
-            this.label30.Location = new System.Drawing.Point(760, 63);
-            this.label30.Name = "label30";
-            this.label30.Size = new System.Drawing.Size(58, 17);
-            this.label30.TabIndex = 56;
-            this.label30.Text = "Emboss";
+            this.button18.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("button18.BackgroundImage")));
+            this.button18.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.button18.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.button18.FlatAppearance.BorderColor = System.Drawing.Color.LightGray;
+            this.button18.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.button18.Location = new System.Drawing.Point(191, 104);
+            this.button18.Name = "button18";
+            this.button18.Size = new System.Drawing.Size(55, 39);
+            this.button18.TabIndex = 58;
+            this.button18.UseVisualStyleBackColor = true;
+            this.button18.Click += new System.EventHandler(this.button18_Click);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.DimGray;
-            this.ClientSize = new System.Drawing.Size(1269, 752);
+            this.ClientSize = new System.Drawing.Size(1269, 849);
             this.Controls.Add(this.button15);
             this.Controls.Add(this.label25);
             this.Controls.Add(this.label24);
             this.Controls.Add(this.label23);
             this.Controls.Add(this.textBox8);
             this.Controls.Add(this.textBox7);
-            this.Controls.Add(this.textBox5);
-            this.Controls.Add(this.textBox4);
-            this.Controls.Add(this.textBox3);
-            this.Controls.Add(this.textBox2);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.trackBar1);
             this.Controls.Add(this.label13);
@@ -867,10 +864,6 @@
         private System.Windows.Forms.Button button12;
         private System.Windows.Forms.Label label20;
         private System.Windows.Forms.Button button13;
-        private System.Windows.Forms.TextBox textBox2;
-        private System.Windows.Forms.TextBox textBox3;
-        private System.Windows.Forms.TextBox textBox4;
-        private System.Windows.Forms.TextBox textBox5;
         private System.Windows.Forms.Label label21;
         private System.Windows.Forms.TextBox textBox7;
         private System.Windows.Forms.TextBox textBox8;
@@ -890,6 +883,8 @@
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Button button6;
         private System.Windows.Forms.Label label30;
+        private System.Windows.Forms.Button button14;
+        private System.Windows.Forms.Button button18;
     }
 }
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -20,12 +21,18 @@ namespace Photo_Editor
         int lastCol = 0;
         Image imgOriginal;
         Image Picture;
+        Bitmap newBitmap;
         Boolean openedPicture = false;
         Boolean mouseClicked;
         Point startPoint = new Point();
         Point endPoint = new Point();
         Rectangle rectCropArea;
         Bitmap targetBitmap;
+        readonly Stack<Bitmap> UndoStack = new Stack<Bitmap>();
+        readonly Stack<Bitmap> RedoStack = new Stack<Bitmap>();
+        Bitmap bitmapObject;
+        Graphics graphicsObject;
+
         public CancellationTokenSource cTokenSource;
         public CancellationToken cToken;
         public Form1()
@@ -56,7 +63,11 @@ namespace Photo_Editor
                 string imgFileName = openFileDialog1.FileName;
                 imgOriginal = Image.FromFile(imgFileName);
                 pictureBox1.Image = imgOriginal;
+                bitmapObject = (Bitmap)imgOriginal.Clone();
+                UndoStack.Push((Bitmap)bitmapObject.Clone());
+                newBitmap = new Bitmap(openFileDialog1.FileName);
                 openedPicture = true;
+
             }
             catch (Exception ex)
             {
@@ -122,6 +133,9 @@ namespace Photo_Editor
                     bmp2.SetPixel(i, j, c2);
                 }
             }
+            bitmapObject = (Bitmap)bmp2.Clone();
+            UndoStack.Push((Bitmap)bitmapObject.Clone());
+            RedoStack.Clear();
             imgGray = (Image)bmp2;
             return imgGray;
 
@@ -146,6 +160,8 @@ namespace Photo_Editor
                 }
                 w--;
             }
+            bitmapObject = (Bitmap)bmp2.Clone();
+            UndoStack.Push((Bitmap)bitmapObject.Clone());
             imgFlip = (Image)bmp2;
             return imgFlip;
         }
@@ -169,6 +185,8 @@ namespace Photo_Editor
                 }
                 w--;
             }
+            bitmapObject = (Bitmap)bmp2.Clone();
+            UndoStack.Push((Bitmap)bitmapObject.Clone());
             imgFlip = (Image)bmp2;
             return imgFlip;
         }
@@ -189,6 +207,8 @@ namespace Photo_Editor
                     bmp2.SetPixel(x, y, inv);
                 }
             }
+            bitmapObject = (Bitmap)bmp2.Clone();
+            UndoStack.Push((Bitmap)bitmapObject.Clone());
             imgInvert = (Image)bmp2;
             return imgInvert;
 
@@ -231,7 +251,8 @@ namespace Photo_Editor
                     bmp2.SetPixel(x, y, newColor);
                 }
             }
-
+            bitmapObject = (Bitmap)bmp2.Clone();
+            UndoStack.Push((Bitmap)bitmapObject.Clone());
             imgContrast = (Image)bmp2;
             return imgContrast;
 
@@ -245,9 +266,10 @@ namespace Photo_Editor
             Bitmap bmp2 = new Bitmap(imgColor.Width, imgColor.Height);
             for (var yy = 0; yy < imgColor.Height && yy < imgColor.Height; yy += 20)
             {
-                cToken.ThrowIfCancellationRequested();
+                
                 for (var xx = 0; xx < imgColor.Width && xx < imgColor.Width; xx += 20)
                 {
+                    cToken.ThrowIfCancellationRequested();
                     var cellColors = new List<Color>();
                     // Store each color from the 4x4 cell into cellColors.
                     for (var y = yy; y < yy + 20 && y < imgColor.Height; y++)
@@ -274,6 +296,8 @@ namespace Photo_Editor
                     }
                 }
             }
+            bitmapObject = (Bitmap)bmp2.Clone();
+            UndoStack.Push((Bitmap)bitmapObject.Clone());
             imgPixelated = (Image)bmp2;
             return imgPixelated;
         }
@@ -308,6 +332,8 @@ namespace Photo_Editor
             Graphics graphics = Graphics.FromImage(bitmap);
             graphics.DrawImage(pic, new Rectangle(0, 0, pic.Width, pic.Height), 0, 0, pic.Width, pic.Height, GraphicsUnit.Pixel, imageAttributes);
             graphics.Dispose();
+            bitmapObject = (Bitmap)bitmap.Clone();
+            UndoStack.Push((Bitmap)bitmapObject.Clone());
             return bitmap;
         }
         Image serpia(object obj)
@@ -318,9 +344,10 @@ namespace Photo_Editor
             Bitmap bmp2 = new Bitmap(imgColor.Width, imgColor.Height);
             for (int y = 0; y < imgColor.Height; y++)
             {
-                cToken.ThrowIfCancellationRequested();
+                
                 for (int x = 0; x < imgColor.Width; x++)
                 {
+                    cToken.ThrowIfCancellationRequested();
                     Color color = bmp1.GetPixel(x, y);
                     //c1 = bmp1.GetPixel(i, j);
                     int a = color.A;
@@ -360,6 +387,8 @@ namespace Photo_Editor
 
                 }
             }
+            bitmapObject = (Bitmap)bmp2.Clone();
+            UndoStack.Push((Bitmap)bitmapObject.Clone());
             imgSerpia = (Image)bmp2;
             return imgSerpia;
 
@@ -379,6 +408,8 @@ namespace Photo_Editor
             gfx.InterpolationMode = InterpolationMode.HighQualityBicubic;
             gfx.DrawImage(imgColor, new Point(0, 0));
             gfx.Dispose();
+            bitmapObject = (Bitmap)bmp2.Clone();
+            UndoStack.Push((Bitmap)bitmapObject.Clone());
             imgRotateNinety = (Image)bmp2;
             return imgRotateNinety;
         }
@@ -397,88 +428,57 @@ namespace Photo_Editor
             gfx.InterpolationMode = InterpolationMode.HighQualityBicubic;
             gfx.DrawImage(imgColor, new Point(0, 0));
             gfx.Dispose();
+            bitmapObject = (Bitmap)bmp2.Clone();
+            UndoStack.Push((Bitmap)bitmapObject.Clone());
             imgRotateLeft = (Image)bmp2;
             return imgRotateLeft;
         }
         private void picOriginalPicture_MouseUp(object sender, MouseEventArgs e)
         {
-            mouseClicked = false;
-
-            if (endPoint.X != -1)
-            {
-                Point currentPoint = new Point(e.X, e.Y);
-                // Display coordinates
-                textBox4.Text = e.X.ToString();
-                textBox5.Text = e.Y.ToString();
-
-            }
-            endPoint.X = -1;
-            endPoint.Y = -1;
-            startPoint.X = -1;
-            startPoint.Y = -1;
         }
-
+        int crpX, crpY, rectW, rectH;
+        public Pen crpPen = new Pen(Color.White);
         private void picOriginalPicture_MouseDown(object sender, MouseEventArgs e)
         {
-            mouseClicked = true;
+            base.OnMouseDown(e);
 
-            startPoint.X = e.X;
-            startPoint.Y = e.Y;
-            // Display coordinates
-            textBox2.Text = startPoint.X.ToString();
-            textBox3.Text = startPoint.Y.ToString();
-
-            endPoint.X = -1;
-            endPoint.Y = -1;
-
-            rectCropArea = new Rectangle(new Point(e.X, e.Y), new Size());
+            if(e.Button==System.Windows.Forms.MouseButtons.Left)
+            {
+                Cursor = Cursors.Cross;
+                crpPen.DashStyle = System.Drawing.Drawing2D.DashStyle.Dot;
+                //set initial x,y cordinates;
+                crpX = e.X;
+                crpY = e.Y;
+            }
         }
 
         private void picOriginalPicture_MouseMove(object sender, MouseEventArgs e)
         {
-            Point ptCurrent = new Point(e.X, e.Y);
 
-            if (mouseClicked)
+            base.OnMouseMove(e);
+
+            if (e.Button == System.Windows.Forms.MouseButtons.Left)
             {
-                if (endPoint.X != -1)
-                {
-                    // Display Coordinates
-                    textBox2.Text = startPoint.X.ToString();
-                    textBox3.Text = startPoint.Y.ToString();
-                    textBox4.Text = e.X.ToString();
-                    textBox5.Text = e.Y.ToString();
-                }
-
-                endPoint = ptCurrent;
-
-                if (e.X > startPoint.X && e.Y > startPoint.Y)
-                {
-                    rectCropArea.Width = e.X - startPoint.X;
-                    rectCropArea.Height = e.Y - startPoint.Y;
-                }
-                else if (e.X < startPoint.X && e.Y > startPoint.Y)
-                {
-                    rectCropArea.Width = startPoint.X - e.X;
-                    rectCropArea.Height = e.Y - startPoint.Y;
-                    rectCropArea.X = e.X;
-                    rectCropArea.Y = startPoint.Y;
-                }
-                else if (e.X > startPoint.X && e.Y < startPoint.Y)
-                {
-                    rectCropArea.Width = e.X - startPoint.X;
-                    rectCropArea.Height = startPoint.Y - e.Y;
-                    rectCropArea.X = startPoint.X;
-                    rectCropArea.Y = e.Y;
-                }
-                else
-                {
-                    rectCropArea.Width = startPoint.X - e.X;
-                    rectCropArea.Height = startPoint.Y - e.Y;
-                    rectCropArea.X = e.X;
-                    rectCropArea.Y = e.Y;
-                }
                 pictureBox1.Refresh();
+                rectW = e.X - crpX;
+                rectH = e.Y - crpY;
+                Graphics g = pictureBox1.CreateGraphics();
+                g.DrawRectangle(crpPen, crpX, crpY, rectW, rectH);
+                g.Dispose();
             }
+
+        }
+
+        private void picOriginalPicture_MouseEnter(object sender, EventArgs e)
+        {
+            base.OnMouseEnter(e);
+            Cursor = Cursors.Cross;
+
+        }
+        protected override void OnMouseEnter(EventArgs e)
+        {
+            base.OnMouseEnter(e);
+            Cursor = Cursors.Default;
         }
         private void picOriginalPicture_Paint(object sender, PaintEventArgs e)
         {
@@ -486,23 +486,40 @@ namespace Photo_Editor
             drawLine.DashStyle = DashStyle.Dash;
             e.Graphics.DrawRectangle(drawLine, rectCropArea);
         }
-        Image crop ()
+        Image crop(object obj)
         {
-            //pictureBox1.Refresh();
+            Image imgColor = (Image)obj;
             Image imgCropped = null;
-            targetBitmap = new Bitmap(pictureBox1.ClientSize.Width, pictureBox1.ClientSize.Height);
-            Bitmap sourceBitmap = new Bitmap(pictureBox1.Image, pictureBox1.Width, pictureBox1.Height);
-            cToken.ThrowIfCancellationRequested();
-            Graphics g = Graphics.FromImage(targetBitmap);
-            g.InterpolationMode = InterpolationMode.HighQualityBicubic;
-            g.PixelOffsetMode = PixelOffsetMode.HighQuality;
-            g.CompositingQuality = CompositingQuality.HighQuality;
+            Thread.Sleep(100);
+            Bitmap bm2 = new Bitmap(imgColor.Width, imgColor.Height);
+            if(pictureBox1.InvokeRequired)
+            {
+                pictureBox1.Invoke(new MethodInvoker(delegate ()
+                {
+                    Cursor = Cursors.Default;
+                    pictureBox1.DrawToBitmap(bm2, pictureBox1.ClientRectangle);
+                }));
+            }
+            else
+            {
+                Cursor = Cursors.Default;
+                pictureBox1.DrawToBitmap(bm2, pictureBox1.ClientRectangle);
+            }
+            
+            Bitmap crpImage = new Bitmap(rectW, rectH);
 
-            g.DrawImage(sourceBitmap, new Rectangle(0, 0, pictureBox1.ClientSize.Width, pictureBox1.ClientSize.Height), rectCropArea, GraphicsUnit.Pixel);
-            if (pictureBox1.Image != null)
-                pictureBox1.Image.Dispose();
-            //pictureBox1.Image = targetBitmap;
-            imgCropped = (Image)targetBitmap;
+            for (int i = 0; i < rectW; i++)
+            {
+                for (int y = 0; y < rectH; y++)
+                {
+                    Color pxlclr = bm2.GetPixel(crpX + i, crpY + y);
+                    crpImage.SetPixel(i, y, pxlclr);
+                }
+            }
+            //pictureBox1.Image = (Image)crpImage;
+            bitmapObject = (Bitmap)crpImage.Clone();
+            UndoStack.Push((Bitmap)bitmapObject.Clone());
+            imgCropped = (Image)crpImage;
             return imgCropped;
 
         }
@@ -556,6 +573,8 @@ namespace Photo_Editor
             Marshal.Copy(result, 0, resData.Scan0, bytes);
             resImg.UnlockBits(resData);
             //return resImg;
+            bitmapObject = (Bitmap)resImg.Clone();
+            UndoStack.Push((Bitmap)bitmapObject.Clone());
             imgGamma = (Image)resImg;
             return imgGamma;
         }
@@ -625,6 +644,8 @@ namespace Photo_Editor
                 }
             }
             //_currentBitmap = (Bitmap)bmap.Clone();
+            bitmapObject = (Bitmap)bmap.Clone();
+            UndoStack.Push((Bitmap)bitmapObject.Clone());
             imgResize = (Image)bmap;
             return imgResize;
 
@@ -656,6 +677,7 @@ namespace Photo_Editor
                 {
                     for (int yy = rectangle.Y; yy < rectangle.Y + rectangle.Height; yy++)
                     {
+                        cToken.ThrowIfCancellationRequested();
                         int avgR = 0, avgG = 0, avgB = 0;
                         int blurPixelCount = 0;
 
@@ -701,6 +723,8 @@ namespace Photo_Editor
                 blurred.UnlockBits(blurredData);
 
                 //return blurred;
+                bitmapObject = (Bitmap)blurred.Clone();
+                UndoStack.Push((Bitmap)bitmapObject.Clone());
                 imgBlur = (Image)blurred;
                 return imgBlur;
             }            
@@ -718,6 +742,7 @@ namespace Photo_Editor
             {
                 for (int y = 1; y <= imgColor.Height - 1; y++)
                 {
+                    cToken.ThrowIfCancellationRequested();
                     nB.SetPixel(x, y, Color.DarkGray);
                 }
             }
@@ -728,6 +753,7 @@ namespace Photo_Editor
                 {
                     try
                     {
+                        cToken.ThrowIfCancellationRequested();
                         Color pixel = bmp1.GetPixel(x, y);
 
                         int colVal = (pixel.R + pixel.G + pixel.B);
@@ -757,6 +783,7 @@ namespace Photo_Editor
                 {
                     try
                     {
+                        cToken.ThrowIfCancellationRequested();
                         Color pixel = bmp1.GetPixel(x, y);
 
                         int colVal = (pixel.R + pixel.G + pixel.B);
@@ -778,6 +805,8 @@ namespace Photo_Editor
                 }
                 
             }
+            bitmapObject = (Bitmap)nB.Clone();
+            UndoStack.Push((Bitmap)bitmapObject.Clone());
             imgEmboss = (Image)nB;
             return imgEmboss;
             //pictureBox1.Image = nB;
@@ -938,53 +967,6 @@ namespace Photo_Editor
             TaskScheduler.FromCurrentSynchronizationContext());
 
         }
-        private void button6_Click(object sender, EventArgs e)
-        {
-            cTokenSource = new CancellationTokenSource();
-            cToken = cTokenSource.Token;
-            float val = 3;
-            try
-            {
-               // float val = float.Parse(textBox1.Text);
-                Func<object, float, Image> func = new Func<object, float, Image>(Contrast);
-                Task<Image> t = new Task<Image>(() => func(pictureBox1.Image, val),cToken);
-                t.Start();
-                t.ContinueWith((task) =>
-                {
-                    try
-                    {
-                        if (task.IsFaulted)
-                        {
-                            throw t.Exception;
-                        }
-                        if (task.IsCompleted)
-                        {
-                            pictureBox1.Image = task.Result;
-                            Picture = pictureBox1.Image;
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show("Please Upload an Image!");
-                    }
-
-                }, CancellationToken.None,
-            TaskContinuationOptions.NotOnCanceled,
-            TaskScheduler.FromCurrentSynchronizationContext());
-
-                t.ContinueWith((task) =>
-                {
-                    MessageBox.Show("Task was Cancelled");
-                }, CancellationToken.None,
-            TaskContinuationOptions.OnlyOnCanceled,
-            TaskScheduler.FromCurrentSynchronizationContext());
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Please enter an value!");
-            }
-
-        }
         private void button8_Click(object sender, EventArgs e)
         {
             cTokenSource = new CancellationTokenSource();
@@ -1024,6 +1006,8 @@ namespace Photo_Editor
         }
         private void trackBar1_Scroll(object sender, EventArgs e)
         {
+            cTokenSource = new CancellationTokenSource();
+            cToken = cTokenSource.Token;
             float red = trackBar1.Value * 0.1f;
             float green = trackBar2.Value * 0.1f;
             float blue = trackBar3.Value * 0.1f;
@@ -1034,16 +1018,42 @@ namespace Photo_Editor
             label10.Text = blue.ToString();
             label12.Text = brightness.ToString();
             Func<float, float, float, float, Image> func = new Func<float, float, float, float, Image>(ChangeRGB);
-            Task<Image> t = new Task<Image>(() => func(red, green, blue, brightness));
+            Task<Image> t = new Task<Image>(() => func(red, green, blue, brightness), cToken);
             t.Start();
             t.ContinueWith((task) =>
             {
-                pictureBox1.Image = task.Result;
-            }, TaskScheduler.FromCurrentSynchronizationContext());
+                try
+                {
+                    if (task.IsFaulted)
+                    {
+                        throw t.Exception;
+                    }
+                    if (task.IsCompleted)
+                    {
+                        pictureBox1.Image = task.Result;
+                        Picture = pictureBox1.Image;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Please Upload an Image!");
+                }
+            }, CancellationToken.None,
+            TaskContinuationOptions.NotOnCanceled,
+            TaskScheduler.FromCurrentSynchronizationContext());
+
+            t.ContinueWith((task) =>
+            {
+                MessageBox.Show("Task was Cancelled");
+            }, CancellationToken.None,
+            TaskContinuationOptions.OnlyOnCanceled,
+            TaskScheduler.FromCurrentSynchronizationContext());
         }
 
         private void trackBar2_Scroll(object sender, EventArgs e)
         {
+            cTokenSource = new CancellationTokenSource();
+            cToken = cTokenSource.Token;
             float red = trackBar1.Value * 0.1f;
             float green = trackBar2.Value * 0.1f;
             float blue = trackBar3.Value * 0.1f;
@@ -1054,16 +1064,42 @@ namespace Photo_Editor
             label10.Text = blue.ToString();
             label12.Text = brightness.ToString();
             Func<float, float, float, float, Image> func = new Func<float, float, float, float, Image>(ChangeRGB);
-            Task<Image> t = new Task<Image>(() => func(red, green, blue, brightness));
+            Task<Image> t = new Task<Image>(() => func(red, green, blue, brightness), cToken);
             t.Start();
             t.ContinueWith((task) =>
             {
-                pictureBox1.Image = task.Result;
-            }, TaskScheduler.FromCurrentSynchronizationContext());
+                try
+                {
+                    if (task.IsFaulted)
+                    {
+                        throw t.Exception;
+                    }
+                    if (task.IsCompleted)
+                    {
+                        pictureBox1.Image = task.Result;
+                        Picture = pictureBox1.Image;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Please Upload an Image!");
+                }
+            }, CancellationToken.None,
+            TaskContinuationOptions.NotOnCanceled,
+            TaskScheduler.FromCurrentSynchronizationContext());
+
+            t.ContinueWith((task) =>
+            {
+                MessageBox.Show("Task was Cancelled");
+            }, CancellationToken.None,
+            TaskContinuationOptions.OnlyOnCanceled,
+            TaskScheduler.FromCurrentSynchronizationContext());
         }
 
         private void trackBar3_Scroll(object sender, EventArgs e)
         {
+            cTokenSource = new CancellationTokenSource();
+            cToken = cTokenSource.Token;
             float red = trackBar1.Value * 0.1f;
             float green = trackBar2.Value * 0.1f;
             float blue = trackBar3.Value * 0.1f;
@@ -1074,16 +1110,42 @@ namespace Photo_Editor
             label10.Text = blue.ToString();
             label12.Text = brightness.ToString();
             Func<float, float, float, float, Image> func = new Func<float, float, float, float, Image>(ChangeRGB);
-            Task<Image> t = new Task<Image>(() => func(red, green, blue, brightness));
+            Task<Image> t = new Task<Image>(() => func(red, green, blue, brightness), cToken);
             t.Start();
             t.ContinueWith((task) =>
             {
-                pictureBox1.Image = task.Result;
-            }, TaskScheduler.FromCurrentSynchronizationContext());
+                try
+                {
+                    if (task.IsFaulted)
+                    {
+                        throw t.Exception;
+                    }
+                    if (task.IsCompleted)
+                    {
+                        pictureBox1.Image = task.Result;
+                        Picture = pictureBox1.Image;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Please Upload an Image!");
+                }
+            }, CancellationToken.None,
+            TaskContinuationOptions.NotOnCanceled,
+            TaskScheduler.FromCurrentSynchronizationContext());
+
+            t.ContinueWith((task) =>
+            {
+                MessageBox.Show("Task was Cancelled");
+            }, CancellationToken.None,
+            TaskContinuationOptions.OnlyOnCanceled,
+            TaskScheduler.FromCurrentSynchronizationContext());
         }
 
         private void trackBar4_Scroll(object sender, EventArgs e)
         {
+            cTokenSource = new CancellationTokenSource();
+            cToken = cTokenSource.Token;
             float red = trackBar1.Value * 0.1f;
             float green = trackBar2.Value * 0.1f;
             float blue = trackBar3.Value * 0.1f;
@@ -1094,12 +1156,36 @@ namespace Photo_Editor
             label10.Text = blue.ToString();
             label12.Text = brightness.ToString();
             Func<float, float, float, float, Image> func = new Func<float, float, float, float, Image>(ChangeRGB);
-            Task<Image> t = new Task<Image>(() => func(red, green, blue, brightness));
+            Task<Image> t = new Task<Image>(() => func(red, green, blue, brightness),cToken);
             t.Start();
             t.ContinueWith((task) =>
             {
-                pictureBox1.Image = task.Result;
-            }, TaskScheduler.FromCurrentSynchronizationContext());
+                try
+                {
+                    if (task.IsFaulted)
+                    {
+                        throw t.Exception;
+                    }
+                    if (task.IsCompleted)
+                    {
+                        pictureBox1.Image = task.Result;
+                        Picture = pictureBox1.Image;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Please Upload an Image!");
+                }
+            }, CancellationToken.None,
+            TaskContinuationOptions.NotOnCanceled,
+            TaskScheduler.FromCurrentSynchronizationContext());
+
+            t.ContinueWith((task) =>
+            {
+                MessageBox.Show("Task was Cancelled");
+            }, CancellationToken.None,
+            TaskContinuationOptions.OnlyOnCanceled,
+            TaskScheduler.FromCurrentSynchronizationContext());
         }
 
         private void button7_Click_1(object sender, EventArgs e)
@@ -1227,62 +1313,52 @@ namespace Photo_Editor
         }
         private void button13_Click(object sender, EventArgs e)
         {
-            Func<Image> func = new Func< Image>(crop);
-            Task<Image> t = new Task<Image>(func);
+            cTokenSource = new CancellationTokenSource();
+            cToken = cTokenSource.Token;
+/*            if (pictureBox1.InvokeRequired)
+            {
+                pictureBox1.Invoke(new MethodInvoker(delegate
+                {
+                    pictureBox1.Enabled = true;
+                }));
+            }*/
+            pictureBox1.Enabled = false;
+            Func<object, Image> func = new Func<object, Image>(crop);
+            Task<Image> t = new Task<Image>(func, pictureBox1.Image, cToken);
             t.Start();
             t.ContinueWith((task) =>
             {
-                pictureBox1.Image = task.Result;
-                Picture = pictureBox1.Image;
-
-            }, TaskScheduler.FromCurrentSynchronizationContext());
-
-        }
-
-        private void button14_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                float val = 3;
-                if(val>5 || val<=0)
+                try
                 {
-                    MessageBox.Show("Please Enter a value between 0.9 - 4");
-                }
-                else
-                {
-                    Func<object, float, Image> func = new Func<object, float, Image>(Gamma);
-                    Task<Image> t = new Task<Image>(() => func(pictureBox1.Image, val));
-                    t.Start();
-                    t.ContinueWith((task) =>
+                    if (task.IsFaulted)
                     {
-                        try
-                        {
-                            if (task.IsFaulted)
-                            {
-                                throw t.Exception;
-                            }
-                            if (task.IsCompleted)
-                            {
-                                pictureBox1.Image = task.Result;
-                                Picture = pictureBox1.Image;
-                            }
-                        }catch (AggregateException ex)
-                        {
-                            MessageBox.Show("Please Upload an Image");
-                        }
-                           
-                    }, TaskScheduler.FromCurrentSynchronizationContext());
+                        throw t.Exception;
+                    }
+                    if (task.IsCompleted)
+                    {
+                        pictureBox1.Image = task.Result;
+                        Picture = pictureBox1.Image;
+                    }
                 }
-                
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Please enter an value!");
-            }
-        }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Please Upload an Image!");
+                }
 
+            }, CancellationToken.None,
+            TaskContinuationOptions.NotOnCanceled,
+            TaskScheduler.FromCurrentSynchronizationContext());
+            t.ContinueWith((task) =>
+            {
+                MessageBox.Show("Task was Cancelled");
+            }, CancellationToken.None,
+            TaskContinuationOptions.OnlyOnCanceled,
+            TaskScheduler.FromCurrentSynchronizationContext());
+        }
         private void button15_Click(object sender, EventArgs e)
         {
+            cTokenSource = new CancellationTokenSource();
+            cToken = cTokenSource.Token;
             try
             {
                 int val1 = int.Parse(textBox7.Text);
@@ -1294,7 +1370,7 @@ namespace Photo_Editor
                 else
                 {
                     Func<object, int, int, Image> func = new Func<object, int, int, Image>(Resize);
-                    Task<Image> t = new Task<Image>(() => func(pictureBox1.Image, val1, val2));
+                    Task<Image> t = new Task<Image>(() => func(pictureBox1.Image, val1, val2), cToken);
                     t.Start();
                     t.ContinueWith((task) =>
                     {
@@ -1315,7 +1391,16 @@ namespace Photo_Editor
                         }
                         
                        
-                    }, TaskScheduler.FromCurrentSynchronizationContext());
+                    }, CancellationToken.None,
+                    TaskContinuationOptions.NotOnCanceled,
+                    TaskScheduler.FromCurrentSynchronizationContext());
+
+                    t.ContinueWith((task) =>
+                    {
+                        MessageBox.Show("Task was Cancelled");
+                    }, CancellationToken.None,
+                    TaskContinuationOptions.OnlyOnCanceled,
+                    TaskScheduler.FromCurrentSynchronizationContext());
                 }
             }catch (Exception ex)
             {
@@ -1330,23 +1415,10 @@ namespace Photo_Editor
 
         private void button17_Click(object sender, EventArgs e)
         {
+            cTokenSource = new CancellationTokenSource();
+            cToken = cTokenSource.Token;
             Func<object, Image> func = new Func<object, Image>(Blur);
-            Task<Image> t = new Task<Image>(func, pictureBox1.Image);
-            t.Start();
-            t.ContinueWith((task) =>
-            {
-                pictureBox1.Image = task.Result;
-                Picture = pictureBox1.Image;
-
-            }, TaskScheduler.FromCurrentSynchronizationContext());
-        }
-
-        private void trackBar5_Scroll(object sender, EventArgs e)
-        {
-            int val = trackBar5.Value;
-            label28.Text = val.ToString();
-            Func<object, float, Image> func = new Func<object, float, Image>(Gamma);
-            Task<Image> t = new Task<Image>(() => func(pictureBox1.Image, val));
+            Task<Image> t = new Task<Image>(func, pictureBox1.Image, cToken);
             t.Start();
             t.ContinueWith((task) =>
             {
@@ -1367,12 +1439,93 @@ namespace Photo_Editor
                     MessageBox.Show("Please Upload an Image");
                 }
 
-            }, TaskScheduler.FromCurrentSynchronizationContext());
+            }, CancellationToken.None,
+                    TaskContinuationOptions.NotOnCanceled,
+                    TaskScheduler.FromCurrentSynchronizationContext());
+
+            t.ContinueWith((task) =>
+            {
+                MessageBox.Show("Task was Cancelled");
+            }, CancellationToken.None,
+            TaskContinuationOptions.OnlyOnCanceled,
+            TaskScheduler.FromCurrentSynchronizationContext());
+        }
+
+        private void button14_Click(object sender, EventArgs e)
+        {
+            if(UndoStack.Count>0)
+            {
+                RedoStack.Push((Bitmap)bitmapObject.Clone());
+                bitmapObject = UndoStack.Pop();
+                graphicsObject = Graphics.FromImage(bitmapObject);
+                pictureBox1.Image = bitmapObject;
+            }
+            else
+            {
+                MessageBox.Show("Nothing To Undo");
+            }
+        }
+
+        private void button18_Click(object sender, EventArgs e)
+        {
+            if (RedoStack.Count > 0)
+            {
+                UndoStack.Push((Bitmap)bitmapObject.Clone());
+                bitmapObject = RedoStack.Pop();
+                graphicsObject = Graphics.FromImage(bitmapObject);
+                pictureBox1.Image = bitmapObject;
+            }
+            else
+            {
+                MessageBox.Show("Nothing To Redo");
+            }
+        }
+
+        private void trackBar5_Scroll(object sender, EventArgs e)
+        {
+            cTokenSource = new CancellationTokenSource();
+            cToken = cTokenSource.Token;
+            int val = trackBar5.Value;
+            label28.Text = val.ToString();
+            Func<object, float, Image> func = new Func<object, float, Image>(Gamma);
+            Task<Image> t = new Task<Image>(() => func(pictureBox1.Image, val),cToken);
+            t.Start();
+            t.ContinueWith((task) =>
+            {
+                try
+                {
+                    if (task.IsFaulted)
+                    {
+                        throw t.Exception;
+                    }
+                    if (task.IsCompleted)
+                    {
+                        pictureBox1.Image = task.Result;
+                        Picture = pictureBox1.Image;
+                    }
+                }
+                catch (AggregateException ex)
+                {
+                    MessageBox.Show("Please Upload an Image");
+                }
+
+            }, CancellationToken.None,
+                TaskContinuationOptions.NotOnCanceled,
+                TaskScheduler.FromCurrentSynchronizationContext());
+
+            t.ContinueWith((task) =>
+            {
+                MessageBox.Show("Task was Cancelled");
+            }, CancellationToken.None,
+                TaskContinuationOptions.OnlyOnCanceled,
+                TaskScheduler.FromCurrentSynchronizationContext());
 
         }
 
         private void trackBar6_Scroll(object sender, EventArgs e)
         {
+            cTokenSource = new CancellationTokenSource();
+            cToken = cTokenSource.Token;
             int val = trackBar6.Value;
             label29.Text = val.ToString();
             Func<object, float, Image> func = new Func<object, float, Image>(Contrast);
@@ -1411,15 +1564,41 @@ namespace Photo_Editor
 
         private void button6_Click_1(object sender, EventArgs e)
         {
+            cTokenSource = new CancellationTokenSource();
+            cToken = cTokenSource.Token;
             Func<object, Image> func = new Func<object, Image>(Emboss);
-            Task<Image> t = new Task<Image>(func, pictureBox1.Image);
+            Task<Image> t = new Task<Image>(func, pictureBox1.Image, cToken);
             t.Start();
             t.ContinueWith((task) =>
             {
-                pictureBox1.Image = task.Result;
-                Picture = pictureBox1.Image;
+                try
+                {
+                    if (task.IsFaulted)
+                    {
+                        throw t.Exception;
+                    }
+                    if (task.IsCompleted)
+                    {
+                        pictureBox1.Image = task.Result;
+                        Picture = pictureBox1.Image;
+                    }
+                }
+                catch (AggregateException ex)
+                {
+                    MessageBox.Show("Please Upload an Image");
+                }
 
-            }, TaskScheduler.FromCurrentSynchronizationContext());
+            }, CancellationToken.None,
+                TaskContinuationOptions.NotOnCanceled,
+                TaskScheduler.FromCurrentSynchronizationContext());
+
+            t.ContinueWith((task) =>
+            {
+                MessageBox.Show("Task was Cancelled");
+            }, CancellationToken.None,
+                TaskContinuationOptions.OnlyOnCanceled,
+                TaskScheduler.FromCurrentSynchronizationContext());
         }
+
     }
 }
