@@ -183,11 +183,11 @@
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(1054, 18);
+            this.label6.Location = new System.Drawing.Point(1025, 18);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(57, 17);
+            this.label6.Size = new System.Drawing.Size(126, 17);
             this.label6.TabIndex = 50;
-            this.label6.Text = "Gamma";
+            this.label6.Text = "Gamma Correction";
             // 
             // label29
             // 
