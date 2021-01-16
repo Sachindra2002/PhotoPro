@@ -812,6 +812,33 @@ namespace Photo_Editor
             //pictureBox1.Image = nB;
 
         }
+        Image Mirror(Object obj)
+        {
+            Image imgColor = (Image)obj;
+            Image imgMirrir = null;
+            Bitmap bmp1 = new Bitmap(imgColor);
+            Bitmap bm2 = new Bitmap(imgColor.Width, imgColor.Height);
+            int width = imgColor.Width;
+            int height = imgColor.Height;
+            Bitmap mimg = new Bitmap(width * 2, height);
+            for (int y = 0; y < height; y++)
+            {
+                for (int lx = 0, rx = width * 2 - 1; lx < width; lx++, rx--)
+                {
+                    cToken.ThrowIfCancellationRequested();
+                    //get source pixel value
+                    Color p = bmp1.GetPixel(lx, y);
+
+                    //set mirror pixel value
+                    mimg.SetPixel(lx, y, p);
+                    mimg.SetPixel(rx, y, p);
+                }
+            }
+            bitmapObject = (Bitmap)mimg.Clone();
+            UndoStack.Push((Bitmap)bitmapObject.Clone());
+            imgMirrir = (Image)mimg;
+            return imgMirrir;
+        }
         /******************************************************************************************************/
         /*                Buttons Below                                                                       */
         /******************************************************************************************************/
@@ -1479,6 +1506,44 @@ namespace Photo_Editor
             {
                 MessageBox.Show("Nothing To Redo");
             }
+        }
+
+        private void button19_Click(object sender, EventArgs e)
+        {
+            cTokenSource = new CancellationTokenSource();
+            cToken = cTokenSource.Token;
+            Func<object, Image> func = new Func<object, Image>(Mirror);
+            Task<Image> t = new Task<Image>(func, pictureBox1.Image, cToken);
+            t.Start();
+            t.ContinueWith((task) =>
+            {
+                try
+                {
+                    if (task.IsFaulted)
+                    {
+                        throw t.Exception;
+                    }
+                    if (task.IsCompleted)
+                    {
+                        pictureBox1.Image = task.Result;
+                        Picture = pictureBox1.Image;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Please Upload an Image!"+ex);
+                }
+            }, CancellationToken.None,
+            TaskContinuationOptions.NotOnCanceled,
+            TaskScheduler.FromCurrentSynchronizationContext());
+
+            t.ContinueWith((task) =>
+            {
+                MessageBox.Show("Task was Cancelled");
+                t.Dispose();
+            }, CancellationToken.None,
+            TaskContinuationOptions.OnlyOnCanceled,
+            TaskScheduler.FromCurrentSynchronizationContext());
         }
 
         private void trackBar5_Scroll(object sender, EventArgs e)
