@@ -1531,7 +1531,7 @@ namespace Photo_Editor
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Please Upload an Image!"+ex);
+                    MessageBox.Show("Please Upload an Image!");
                 }
             }, CancellationToken.None,
             TaskContinuationOptions.NotOnCanceled,
