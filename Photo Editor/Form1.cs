@@ -32,6 +32,8 @@ namespace Photo_Editor
         readonly Stack<Bitmap> RedoStack = new Stack<Bitmap>();
         Bitmap bitmapObject;
         Graphics graphicsObject;
+        int[,,] buffer;
+        Bitmap bit_map;
 
         public CancellationTokenSource cTokenSource;
         public CancellationToken cToken;
@@ -44,6 +46,7 @@ namespace Photo_Editor
             trackBar6.Minimum = -20;
             trackBar6.Maximum = 20;
             trackBar6.Value = 0;
+
         }
         private void button1_Click(object sender, EventArgs e)
         {
@@ -66,6 +69,8 @@ namespace Photo_Editor
                 bitmapObject = (Bitmap)imgOriginal.Clone();
                 UndoStack.Push((Bitmap)bitmapObject.Clone());
                 newBitmap = new Bitmap(openFileDialog1.FileName);
+                buffer = new int[3, newBitmap.Height, newBitmap.Width];
+                bit_map = new Bitmap(pictureBox1.Image);
                 openedPicture = true;
 
             }
@@ -839,6 +844,113 @@ namespace Photo_Editor
             imgMirrir = (Image)mimg;
             return imgMirrir;
         }
+        Image Sharpen(object obj)
+        {
+            Image imgColor = (Image)obj;
+            Bitmap temp = (Bitmap)imgColor;
+            Bitmap bmp = (Bitmap)temp.Clone();
+            Image imgShrp = null;
+
+            Bitmap oriBmp = new Bitmap(bmp);
+
+            Color c;
+
+            for (int row = 1; row < bmp.Height - 2; row++)
+            {
+                for (int col = 1; col < bmp.Width - 2; col++)
+                {
+
+
+                    cToken.ThrowIfCancellationRequested();
+                    c = oriBmp.GetPixel(col, row);
+                    buffer[0, row, col] = c.R;
+                    buffer[1, row, col] = c.G;
+                    buffer[2, row, col] = c.B;
+
+
+                    int R = (int)(buffer[0, row, col] + 0.5 * (buffer[0, row, col] - buffer[0, row - 1, col - 1]));
+                    int G = (int)(buffer[1, row, col] + 0.5 * (buffer[1, row, col] - buffer[1, row - 1, col - 1]));
+                    int B = (int)(buffer[2, row, col] + 0.5 * (buffer[2, row, col] - buffer[2, row - 1, col - 1]));
+                    if (R > 255)
+                    {
+                        R = 255;
+                    }
+                    if (R < 0)
+                    {
+                        R = 0;
+                    }
+                    if (G > 255)
+                    {
+                        G = 255;
+                    }
+                    if (G < 0)
+                    {
+                        G = 0;
+                    }
+                    if (B > 255)
+                    {
+                        B = 255;
+                    }
+                    if (B < 0)
+                    {
+                        B = 0;
+                    }
+                    Color c1 = Color.FromArgb(R, G, B);
+                    bmp.SetPixel(col, row, c1);
+                }
+
+
+
+            }
+
+            bitmapObject = (Bitmap)bmp.Clone();
+            UndoStack.Push((Bitmap)bitmapObject.Clone());
+            imgShrp = (Image)bmp;
+            return imgShrp;
+        }
+        private void ReadPixels()
+        {
+            for(int i = 0; i<bit_map.Height; i++)
+            {
+                for(int j = 0; j<bit_map.Width; j++)
+                {
+                    Color c = bit_map.GetPixel(j, i);
+                    buffer[0, i, j] = c.R;
+                    buffer[1, i, j] = c.G;
+                    buffer[2, i, j] = c.B;
+                }
+            }
+        }
+        Image Diffuse(object obj)
+        {
+            Image imgColor = (Image)obj;
+            Image imgDiffused = null;
+            Bitmap bm1 = new Bitmap(imgColor);
+            Bitmap bm2 = new Bitmap(imgColor.Width, imgColor.Height);
+            ReadPixels();
+            int adj = 1;
+            Color c;
+            for (int row = 2; row<bm1.Height - 3; row++)
+            {
+                for(int col = 2; col< bm1.Width - 3; col++)
+                {
+                    cToken.ThrowIfCancellationRequested();
+                    c = bm1.GetPixel(col, row);
+                    int R = 0, G = 0, B = 0;
+                    int rx = new Random().Next(4);
+                    int ry = new Random().Next(4);
+                    R = buffer[0, row + rx, col + ry];
+                    G = buffer[1, row + rx, col + ry];
+                    B = buffer[2, row + rx, col + ry];
+                    Color pc = Color.FromArgb(R, G, B);
+                    bm2.SetPixel(col, row, pc);
+                }
+            }
+            bitmapObject = (Bitmap)bm2.Clone();
+            UndoStack.Push((Bitmap)bitmapObject.Clone());
+            imgDiffused = (Image)bm2;
+            return imgDiffused;
+        }
         /******************************************************************************************************/
         /*                Buttons Below                                                                       */
         /******************************************************************************************************/
@@ -1173,6 +1285,7 @@ namespace Photo_Editor
         {
             cTokenSource = new CancellationTokenSource();
             cToken = cTokenSource.Token;
+            
             float red = trackBar1.Value * 0.1f;
             float green = trackBar2.Value * 0.1f;
             float blue = trackBar3.Value * 0.1f;
@@ -1513,6 +1626,82 @@ namespace Photo_Editor
             cTokenSource = new CancellationTokenSource();
             cToken = cTokenSource.Token;
             Func<object, Image> func = new Func<object, Image>(Mirror);
+            Task<Image> t = new Task<Image>(func, pictureBox1.Image, cToken);
+            t.Start();
+            t.ContinueWith((task) =>
+            {
+                try
+                {
+                    if (task.IsFaulted)
+                    {
+                        throw t.Exception;
+                    }
+                    if (task.IsCompleted)
+                    {
+                        pictureBox1.Image = task.Result;
+                        Picture = pictureBox1.Image;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Please Upload an Image!");
+                }
+            }, CancellationToken.None,
+            TaskContinuationOptions.NotOnCanceled,
+            TaskScheduler.FromCurrentSynchronizationContext());
+
+            t.ContinueWith((task) =>
+            {
+                MessageBox.Show("Task was Cancelled");
+                t.Dispose();
+            }, CancellationToken.None,
+            TaskContinuationOptions.OnlyOnCanceled,
+            TaskScheduler.FromCurrentSynchronizationContext());
+        }
+
+        private void button20_Click(object sender, EventArgs e)
+        {
+            cTokenSource = new CancellationTokenSource();
+            cToken = cTokenSource.Token;
+            Func<object, Image> func = new Func<object, Image>(Sharpen);
+            Task<Image> t = new Task<Image>(func, pictureBox1.Image, cToken);
+            t.Start();
+            t.ContinueWith((task) =>
+            {
+                try
+                {
+                    if (task.IsFaulted)
+                    {
+                        throw t.Exception;
+                    }
+                    if (task.IsCompleted)
+                    {
+                        pictureBox1.Image = task.Result;
+                        Picture = pictureBox1.Image;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Please Upload an Image!");
+                }
+            }, CancellationToken.None,
+            TaskContinuationOptions.NotOnCanceled,
+            TaskScheduler.FromCurrentSynchronizationContext());
+
+            t.ContinueWith((task) =>
+            {
+                MessageBox.Show("Task was Cancelled");
+                t.Dispose();
+            }, CancellationToken.None,
+            TaskContinuationOptions.OnlyOnCanceled,
+            TaskScheduler.FromCurrentSynchronizationContext());
+        }
+
+        private void button21_Click(object sender, EventArgs e)
+        {
+            cTokenSource = new CancellationTokenSource();
+            cToken = cTokenSource.Token;
+            Func<object, Image> func = new Func<object, Image>(Diffuse);
             Task<Image> t = new Task<Image>(func, pictureBox1.Image, cToken);
             t.Start();
             t.ContinueWith((task) =>

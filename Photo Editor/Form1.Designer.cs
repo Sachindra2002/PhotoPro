@@ -30,6 +30,10 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.panel1 = new System.Windows.Forms.Panel();
+            this.label31 = new System.Windows.Forms.Label();
+            this.button19 = new System.Windows.Forms.Button();
+            this.button18 = new System.Windows.Forms.Button();
+            this.button14 = new System.Windows.Forms.Button();
             this.label30 = new System.Windows.Forms.Label();
             this.button6 = new System.Windows.Forms.Button();
             this.label22 = new System.Windows.Forms.Label();
@@ -88,10 +92,10 @@
             this.label24 = new System.Windows.Forms.Label();
             this.label25 = new System.Windows.Forms.Label();
             this.button15 = new System.Windows.Forms.Button();
-            this.button14 = new System.Windows.Forms.Button();
-            this.button18 = new System.Windows.Forms.Button();
-            this.button19 = new System.Windows.Forms.Button();
-            this.label31 = new System.Windows.Forms.Label();
+            this.button20 = new System.Windows.Forms.Button();
+            this.label32 = new System.Windows.Forms.Label();
+            this.button21 = new System.Windows.Forms.Button();
+            this.label33 = new System.Windows.Forms.Label();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.trackBar6)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.trackBar5)).BeginInit();
@@ -105,6 +109,10 @@
             // panel1
             // 
             this.panel1.BackColor = System.Drawing.Color.LightGray;
+            this.panel1.Controls.Add(this.label33);
+            this.panel1.Controls.Add(this.button21);
+            this.panel1.Controls.Add(this.label32);
+            this.panel1.Controls.Add(this.button20);
             this.panel1.Controls.Add(this.label31);
             this.panel1.Controls.Add(this.button19);
             this.panel1.Controls.Add(this.button18);
@@ -152,6 +160,57 @@
             this.panel1.Size = new System.Drawing.Size(1269, 179);
             this.panel1.TabIndex = 0;
             // 
+            // label31
+            // 
+            this.label31.AutoSize = true;
+            this.label31.Location = new System.Drawing.Point(769, 140);
+            this.label31.Name = "label31";
+            this.label31.Size = new System.Drawing.Size(45, 17);
+            this.label31.TabIndex = 60;
+            this.label31.Text = "Mirror";
+            // 
+            // button19
+            // 
+            this.button19.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("button19.BackgroundImage")));
+            this.button19.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.button19.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.button19.FlatAppearance.BorderColor = System.Drawing.Color.LightGray;
+            this.button19.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.button19.Location = new System.Drawing.Point(763, 94);
+            this.button19.Name = "button19";
+            this.button19.Size = new System.Drawing.Size(55, 43);
+            this.button19.TabIndex = 59;
+            this.button19.UseVisualStyleBackColor = true;
+            this.button19.Click += new System.EventHandler(this.button19_Click);
+            // 
+            // button18
+            // 
+            this.button18.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("button18.BackgroundImage")));
+            this.button18.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.button18.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.button18.FlatAppearance.BorderColor = System.Drawing.Color.LightGray;
+            this.button18.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.button18.Location = new System.Drawing.Point(191, 104);
+            this.button18.Name = "button18";
+            this.button18.Size = new System.Drawing.Size(55, 39);
+            this.button18.TabIndex = 58;
+            this.button18.UseVisualStyleBackColor = true;
+            this.button18.Click += new System.EventHandler(this.button18_Click);
+            // 
+            // button14
+            // 
+            this.button14.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("button14.BackgroundImage")));
+            this.button14.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.button14.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.button14.FlatAppearance.BorderColor = System.Drawing.Color.LightGray;
+            this.button14.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.button14.Location = new System.Drawing.Point(123, 104);
+            this.button14.Name = "button14";
+            this.button14.Size = new System.Drawing.Size(50, 39);
+            this.button14.TabIndex = 57;
+            this.button14.UseVisualStyleBackColor = true;
+            this.button14.Click += new System.EventHandler(this.button14_Click);
+            // 
             // label30
             // 
             this.label30.AutoSize = true;
@@ -178,7 +237,7 @@
             // label22
             // 
             this.label22.AutoSize = true;
-            this.label22.Location = new System.Drawing.Point(1054, 92);
+            this.label22.Location = new System.Drawing.Point(1083, 92);
             this.label22.Name = "label22";
             this.label22.Size = new System.Drawing.Size(61, 17);
             this.label22.TabIndex = 54;
@@ -187,7 +246,7 @@
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(1025, 18);
+            this.label6.Location = new System.Drawing.Point(1053, 18);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(126, 17);
             this.label6.TabIndex = 50;
@@ -196,7 +255,7 @@
             // label29
             // 
             this.label29.AutoSize = true;
-            this.label29.Location = new System.Drawing.Point(905, 121);
+            this.label29.Location = new System.Drawing.Point(931, 120);
             this.label29.Name = "label29";
             this.label29.Size = new System.Drawing.Size(22, 17);
             this.label29.TabIndex = 53;
@@ -205,16 +264,16 @@
             // trackBar6
             // 
             this.trackBar6.BackColor = System.Drawing.Color.LightGray;
-            this.trackBar6.Location = new System.Drawing.Point(934, 110);
+            this.trackBar6.Location = new System.Drawing.Point(965, 110);
             this.trackBar6.Name = "trackBar6";
-            this.trackBar6.Size = new System.Drawing.Size(276, 56);
+            this.trackBar6.Size = new System.Drawing.Size(271, 56);
             this.trackBar6.TabIndex = 52;
             this.trackBar6.Scroll += new System.EventHandler(this.trackBar6_Scroll);
             // 
             // label28
             // 
             this.label28.AutoSize = true;
-            this.label28.Location = new System.Drawing.Point(905, 36);
+            this.label28.Location = new System.Drawing.Point(931, 36);
             this.label28.Name = "label28";
             this.label28.Size = new System.Drawing.Size(24, 17);
             this.label28.TabIndex = 50;
@@ -223,9 +282,9 @@
             // trackBar5
             // 
             this.trackBar5.BackColor = System.Drawing.Color.LightGray;
-            this.trackBar5.Location = new System.Drawing.Point(934, 33);
+            this.trackBar5.Location = new System.Drawing.Point(965, 33);
             this.trackBar5.Name = "trackBar5";
-            this.trackBar5.Size = new System.Drawing.Size(276, 56);
+            this.trackBar5.Size = new System.Drawing.Size(271, 56);
             this.trackBar5.TabIndex = 51;
             this.trackBar5.Scroll += new System.EventHandler(this.trackBar5_Scroll);
             // 
@@ -755,56 +814,51 @@
             this.button15.UseVisualStyleBackColor = true;
             this.button15.Click += new System.EventHandler(this.button15_Click);
             // 
-            // button14
+            // button20
             // 
-            this.button14.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("button14.BackgroundImage")));
-            this.button14.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.button14.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.button14.FlatAppearance.BorderColor = System.Drawing.Color.LightGray;
-            this.button14.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button14.Location = new System.Drawing.Point(123, 104);
-            this.button14.Name = "button14";
-            this.button14.Size = new System.Drawing.Size(50, 39);
-            this.button14.TabIndex = 57;
-            this.button14.UseVisualStyleBackColor = true;
-            this.button14.Click += new System.EventHandler(this.button14_Click);
+            this.button20.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("button20.BackgroundImage")));
+            this.button20.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.button20.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.button20.FlatAppearance.BorderColor = System.Drawing.Color.LightGray;
+            this.button20.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.button20.Location = new System.Drawing.Point(853, 20);
+            this.button20.Name = "button20";
+            this.button20.Size = new System.Drawing.Size(44, 39);
+            this.button20.TabIndex = 61;
+            this.button20.UseVisualStyleBackColor = true;
+            this.button20.Click += new System.EventHandler(this.button20_Click);
             // 
-            // button18
+            // label32
             // 
-            this.button18.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("button18.BackgroundImage")));
-            this.button18.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.button18.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.button18.FlatAppearance.BorderColor = System.Drawing.Color.LightGray;
-            this.button18.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button18.Location = new System.Drawing.Point(191, 104);
-            this.button18.Name = "button18";
-            this.button18.Size = new System.Drawing.Size(55, 39);
-            this.button18.TabIndex = 58;
-            this.button18.UseVisualStyleBackColor = true;
-            this.button18.Click += new System.EventHandler(this.button18_Click);
+            this.label32.AutoSize = true;
+            this.label32.Location = new System.Drawing.Point(850, 65);
+            this.label32.Name = "label32";
+            this.label32.Size = new System.Drawing.Size(62, 17);
+            this.label32.TabIndex = 62;
+            this.label32.Text = "Sharpen";
             // 
-            // button19
+            // button21
             // 
-            this.button19.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("button19.BackgroundImage")));
-            this.button19.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.button19.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.button19.FlatAppearance.BorderColor = System.Drawing.Color.LightGray;
-            this.button19.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button19.Location = new System.Drawing.Point(763, 94);
-            this.button19.Name = "button19";
-            this.button19.Size = new System.Drawing.Size(55, 43);
-            this.button19.TabIndex = 59;
-            this.button19.UseVisualStyleBackColor = true;
-            this.button19.Click += new System.EventHandler(this.button19_Click);
+            this.button21.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("button21.BackgroundImage")));
+            this.button21.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.button21.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.button21.FlatAppearance.BorderColor = System.Drawing.Color.LightGray;
+            this.button21.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.button21.Location = new System.Drawing.Point(853, 93);
+            this.button21.Name = "button21";
+            this.button21.Size = new System.Drawing.Size(48, 40);
+            this.button21.TabIndex = 63;
+            this.button21.UseVisualStyleBackColor = true;
+            this.button21.Click += new System.EventHandler(this.button21_Click);
             // 
-            // label31
+            // label33
             // 
-            this.label31.AutoSize = true;
-            this.label31.Location = new System.Drawing.Point(769, 140);
-            this.label31.Name = "label31";
-            this.label31.Size = new System.Drawing.Size(45, 17);
-            this.label31.TabIndex = 60;
-            this.label31.Text = "Mirror";
+            this.label33.AutoSize = true;
+            this.label33.Location = new System.Drawing.Point(850, 140);
+            this.label33.Name = "label33";
+            this.label33.Size = new System.Drawing.Size(52, 17);
+            this.label33.TabIndex = 64;
+            this.label33.Text = "Diffuse";
             // 
             // Form1
             // 
@@ -916,6 +970,10 @@
         private System.Windows.Forms.Button button18;
         private System.Windows.Forms.Button button19;
         private System.Windows.Forms.Label label31;
+        private System.Windows.Forms.Button button20;
+        private System.Windows.Forms.Button button21;
+        private System.Windows.Forms.Label label32;
+        private System.Windows.Forms.Label label33;
     }
 }
 
