@@ -951,6 +951,43 @@ namespace Photo_Editor
             imgDiffused = (Image)bm2;
             return imgDiffused;
         }
+        Image Threashold(Object obj)
+        {
+            Image imgColor = (Image)obj;
+            Bitmap bmp = (Bitmap)imgColor;
+            Image imgThres = null;
+            Bitmap oriBmp = new Bitmap(bmp);
+            Color c;
+            double avgBright = 0;
+            for (int y = 0; y < bmp.Height; y++)
+            {
+                for (int x = 0; x < bmp.Width; x++)
+                {
+                    cToken.ThrowIfCancellationRequested();
+                    // Get the brightness of this pixel
+                    avgBright += oriBmp.GetPixel(x, y).GetBrightness();
+                }
+            }
+
+            // Get the average brightness and limit it's min / max
+            avgBright = avgBright / (oriBmp.Width * oriBmp.Height);
+            avgBright = avgBright < .3 ? .3 : avgBright;
+            avgBright = avgBright > .7 ? .7 : avgBright;
+
+            // Convert image to black and white based on average brightness
+            for (int y = 0; y < bmp.Height; y++)
+            {
+                for (int x = 0; x < bmp.Width; x++)
+                {
+                    cToken.ThrowIfCancellationRequested();
+                    // Set this pixel to black or white based on threshold
+                    if (oriBmp.GetPixel(x, y).GetBrightness() > avgBright) bmp.SetPixel(x, y, Color.White);
+                    else bmp.SetPixel(x, y, Color.Black);
+                }
+            }
+            imgThres = (Image)bmp;
+            return imgThres;
+        }
         /******************************************************************************************************/
         /*                Buttons Below                                                                       */
         /******************************************************************************************************/
@@ -1702,6 +1739,44 @@ namespace Photo_Editor
             cTokenSource = new CancellationTokenSource();
             cToken = cTokenSource.Token;
             Func<object, Image> func = new Func<object, Image>(Diffuse);
+            Task<Image> t = new Task<Image>(func, pictureBox1.Image, cToken);
+            t.Start();
+            t.ContinueWith((task) =>
+            {
+                try
+                {
+                    if (task.IsFaulted)
+                    {
+                        throw t.Exception;
+                    }
+                    if (task.IsCompleted)
+                    {
+                        pictureBox1.Image = task.Result;
+                        Picture = pictureBox1.Image;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Please Upload an Image!");
+                }
+            }, CancellationToken.None,
+            TaskContinuationOptions.NotOnCanceled,
+            TaskScheduler.FromCurrentSynchronizationContext());
+
+            t.ContinueWith((task) =>
+            {
+                MessageBox.Show("Task was Cancelled");
+                t.Dispose();
+            }, CancellationToken.None,
+            TaskContinuationOptions.OnlyOnCanceled,
+            TaskScheduler.FromCurrentSynchronizationContext());
+        }
+
+        private void button22_Click(object sender, EventArgs e)
+        {
+            cTokenSource = new CancellationTokenSource();
+            cToken = cTokenSource.Token;
+            Func<object, Image> func = new Func<object, Image>(Threashold);
             Task<Image> t = new Task<Image>(func, pictureBox1.Image, cToken);
             t.Start();
             t.ContinueWith((task) =>
